@@ -5,6 +5,10 @@ import fs from "fs";
 const rootDir = path.join(__dirname, "..");
 const cacheDir = rootDir + "/images/cache/";
 
+if (!fs.existsSync(cacheDir)) {
+  fs.mkdirSync(path.join(rootDir, "/images/cache"));
+}
+
 export function cleanOldCache(except: string): number {
   const files = fs.readdirSync(cacheDir);
   files.sort(function(a, b) {
@@ -28,7 +32,12 @@ export async function resizeImage(
   height: number
 ): Promise<string> {
   const cachedImg = getCachedPath(filename, width, height);
-  cleanOldCache(path.basename(cachedImg));
+
+  cleanOldCache(
+    /*this pramater for except this path from removing for this request*/
+
+    path.basename(cachedImg)
+  );
   return new Promise((resolve, reject) => {
     if (!fs.existsSync(cachedImg)) {
       return sharp(rootDir + "/images/" + filename + ".jpg")
@@ -43,6 +52,10 @@ export async function resizeImage(
   });
 }
 
-function getCachedPath(filename: string, width: number, height: number) {
+function getCachedPath(
+  filename: string,
+  width: number,
+  height: number
+): string {
   return path.join(cacheDir, filename + "." + width + "-" + height + ".jpg");
 }
